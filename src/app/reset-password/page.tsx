@@ -7,6 +7,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp"; // Import InputOTP from shadcn
 
 const ResetPasswordPage: React.FC = () => {
   const [otp, setOtp] = useState("");
@@ -35,48 +40,48 @@ const ResetPasswordPage: React.FC = () => {
     );
   };
 
-  const handleReset = (e: React.FormEvent) => {
+  const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    const storedOtp = localStorage.getItem("otp");
-    const storedEmail = localStorage.getItem("otpEmail");
-    const users = JSON.parse(localStorage.getItem("users") ?? "[]");
-
-    if (otp !== storedOtp) {
-      toast({
-        title: "Error",
-        description: "Invalid OTP",
-        variant: "destructive",
-      });
-      return;
-    }
 
     if (!validatePassword(newPassword)) {
       toast({
         title: "Error",
-        description:
-          "Password must be at least 8 characters long and contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 symbol.",
+        description: "Password does not meet complexity requirements.",
         variant: "destructive",
       });
       return;
     }
 
-    const updatedUsers = users.map(
-      (user: { email: string; password: string }) => {
-        if (user.email === storedEmail) {
-          return { ...user, password: newPassword };
-        }
-        return user;
-      }
-    );
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    localStorage.removeItem("otp");
-    localStorage.removeItem("otpEmail");
+    try {
+      const response = await fetch("/api/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ otp, newPassword }),
+      });
 
-    toast({
-      title: "Password Reset",
-      description: "Your password has been reset successfully",
-    });
-    router.push("/login");
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Password has been reset successfully.",
+        });
+        router.push("/login");
+      } else {
+        const data = await response.json();
+        toast({
+          title: "Error",
+          description: data.error || "Failed to reset password.",
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({
+        title: "Error",
+        description: "An error occurred while resetting the password.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -84,13 +89,20 @@ const ResetPasswordPage: React.FC = () => {
       <form onSubmit={handleReset} className="w-full max-w-sm mt-8 space-y-6">
         <div className="space-y-2">
           <Label htmlFor="otp">Enter OTP</Label>
-          <Input
-            id="otp"
-            type="text"
-            required
+          <InputOTP
+            maxLength={6}
             value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-          />
+            onChange={(value) => setOtp(value)}
+          >
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
         </div>
         <div className="space-y-2">
           <Label htmlFor="newPassword">New Password</Label>
