@@ -1,44 +1,78 @@
 "use client";
 
-import React, { useState, ChangeEvent, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Camera, Search, LogOut } from "lucide-react";
-import Logo from "@/components/logo";
 import { analyzeImage } from "@/utils/openai";
 import { useToast } from "@/hooks/use-toast";
-import Image from "next/image";
+import AnalysisTabs from "@/components/dashboard/analysis-tabs";
+import ImageUploader from "@/components/dashboard/image-uploader";
+import { SearchTop } from "@/components/dashboard/search";
+import SettingsDialog from "@/components/dashboard/settings-dialog";
+import ProfileDialog from "@/components/dashboard/profile-dialog";
+import HeaderPage from "@/components/dashboard/header";
+import { useTranslations } from "@/hooks/use-translations";
+import LogoutDialog from "@/components/dashboard/logout-dialog";
+import ErrorBoundary from "@/components/error-boundary";
 
 const DashboardPage: React.FC = () => {
+  const { t, locale } = useTranslations();
+
+  // Fungsi untuk mengambil nilai dari localStorage atau menggunakan nilai default
+  const getInitialLanguage = () => {
+    return localStorage.getItem("language") ?? locale;
+  };
+
+  const getInitialTheme = () => {
+    return localStorage.getItem("theme") ?? "light";
+  };
+
   const [image, setImage] = useState<string | null>(null);
-  const [user, setUser] = useState<{ username: string } | null>(null);
+  const [user, setUser] = useState<{ username: string; email: string } | null>(
+    null
+  );
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSettingOpen, setIsSettingOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Set nilai awal dari localStorage atau default
+  const [language, setLanguage] = useState<string>(getInitialLanguage());
+  const [theme, setTheme] = useState<string>(getInitialTheme());
+
   const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
-    if (currentUser) {
-      setUser(JSON.parse(currentUser));
-    } else {
+
+    try {
+      if (currentUser) {
+        const parsedUser = JSON.parse(currentUser);
+        setUser(parsedUser);
+      } else {
+        router.push("/login");
+      }
+    } catch (error) {
+      console.error("Failed to parse user data from localStorage", error);
       router.push("/login");
     }
-  }, [router]);
+  }, [router]); // Runs once on mount
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setImage(base64String.split(",")[1]);
-      };
-      reader.readAsDataURL(file);
+  // Simpan language ke localStorage jika berubah
+  useEffect(() => {
+    if (language) {
+      localStorage.setItem("language", language);
     }
-  };
+  }, [language]);
 
+  // Simpan theme ke localStorage jika berubah
+  useEffect(() => {
+    if (theme) {
+      localStorage.setItem("theme", theme);
+    }
+  }, [theme]);
+
+  // Fungsi untuk mengelola analisis gambar
   const handleAnalyzeImage = async () => {
     if (image) {
       setIsAnalyzing(true);
@@ -51,11 +85,11 @@ const DashboardPage: React.FC = () => {
         );
       } catch (error) {
         toast({
-          title: "Error",
+          title: t("dashboard_page.error"),
           description:
             error instanceof Error
               ? error.message
-              : "Gagal menganalisis gambar. Silakan coba lagi.",
+              : t("dashboard_page.image_analysis_failed"),
           variant: "destructive",
         });
         console.error("Error details:", error);
@@ -65,67 +99,72 @@ const DashboardPage: React.FC = () => {
     }
   };
 
+  // Fungsi untuk menutup dialog
+  // const handleCloseDialog = () => {
+  //   setIsDialogOpen(false);
+  //   setIsProfileOpen(false);
+  //   setIsSettingOpen(false);
+  // };
+
+  // Fungsi untuk logout
   const handleLogout = () => {
+    setIsDialogOpen(true);
+  };
+
+  const confirmLogout = () => {
     localStorage.removeItem("currentUser");
-    router.push("/");
+    router.push("/login");
   };
 
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center space-x-4">
-          <Logo />
-          <Input type="text" placeholder="Search..." className="w-64" />
-          <Button size="icon">
-            <Search className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="flex items-center space-x-4">
-          <span>Welcome, {user.username}</span>
-          <Button onClick={handleLogout} variant="ghost" size="icon">
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
-      </header>
-      <main className="container mx-auto mt-8">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-64 h-64 border-2 border-dashed rounded-lg flex items-center justify-center relative">
-            {image ? (
-              <Image
-                src={`data:image/jpeg;base64,${image}`}
-                alt="Uploaded food"
-                className="w-full h-full object-cover rounded-lg"
-                width={500}
-                height={500}
-                unoptimized={true}
-              />
-            ) : (
-              <Camera className="h-12 w-12 text-gray-400" />
-            )}
+    <div className={`min-h-screen bg-background ${theme}`}>
+      <HeaderPage
+        user={user}
+        setIsProfileOpen={setIsProfileOpen}
+        setIsSettingOpen={setIsSettingOpen}
+        handleLogout={handleLogout}
+      />
 
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
-          </div>
-          <Button onClick={handleAnalyzeImage} disabled={!image || isAnalyzing}>
-            {isAnalyzing ? "Menganalisis..." : "Analisis Gambar"}
-          </Button>
-        </div>
-        <Tabs defaultValue="food" className="mt-8">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="food">Food</TabsTrigger>
-            <TabsTrigger value="drink">Drink</TabsTrigger>
-            <TabsTrigger value="snack">Snack</TabsTrigger>
-          </TabsList>
-          <TabsContent value="food">Food Content</TabsContent>
-          <TabsContent value="drink">Drink Content</TabsContent>
-          <TabsContent value="snack">Snack Content</TabsContent>
-        </Tabs>
+      {isDialogOpen && (
+        <LogoutDialog
+          isDialogOpen={isDialogOpen}
+          setIsDialogOpen={setIsDialogOpen}
+          confirmLogout={confirmLogout}
+        />
+      )}
+
+      {isProfileOpen && (
+        <ProfileDialog
+          user={user}
+          isProfileOpen={isProfileOpen}
+          setIsProfileOpen={setIsProfileOpen}
+        />
+      )}
+
+      {isSettingOpen && (
+        <SettingsDialog
+          language={language}
+          setLanguage={setLanguage}
+          theme={theme}
+          setTheme={setTheme}
+          isSettingOpen={isSettingOpen}
+          setIsSettingOpen={setIsSettingOpen}
+        />
+      )}
+
+      <main className="container mx-auto my-8 px-4">
+        <SearchTop />
+        <ImageUploader
+          onAnalyzeImage={handleAnalyzeImage}
+          setImage={setImage}
+          isAnalyzing={isAnalyzing}
+          image={image}
+        />
+        <ErrorBoundary>
+          <AnalysisTabs />
+        </ErrorBoundary>
       </main>
     </div>
   );
