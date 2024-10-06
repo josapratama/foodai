@@ -1,5 +1,9 @@
+// lib/prisma.ts
+
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ["query"],
+});
 
-export default prisma;
+export default prisma; // Ekspor default
