@@ -15,16 +15,7 @@ import LogoutDialog from "@/components/dashboard/logout-dialog";
 import ErrorBoundary from "@/components/error-boundary";
 
 const DashboardPage: React.FC = () => {
-  const { t, locale } = useTranslations();
-
-  // Fungsi untuk mengambil nilai dari localStorage atau menggunakan nilai default
-  const getInitialLanguage = () => {
-    return localStorage.getItem("language") ?? locale;
-  };
-
-  const getInitialTheme = () => {
-    return localStorage.getItem("theme") ?? "light";
-  };
+  const { t } = useTranslations();
 
   const [image, setImage] = useState<string | null>(null);
   const [user, setUser] = useState<{ username: string; email: string } | null>(
@@ -34,14 +25,13 @@ const DashboardPage: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSettingOpen, setIsSettingOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-
-  // Set nilai awal dari localStorage atau default
-  const [language, setLanguage] = useState<string>(getInitialLanguage());
-  const [theme, setTheme] = useState<string>(getInitialTheme());
+  const [language, setLanguage] = useState<string>("light");
+  const [theme, setTheme] = useState<string>("light");
 
   const router = useRouter();
   const { toast } = useToast();
 
+  // Check if in the browser before accessing localStorage
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
 
@@ -58,21 +48,31 @@ const DashboardPage: React.FC = () => {
     }
   }, [router]); // Runs once on mount
 
-  // Simpan language ke localStorage jika berubah
+  // Initialize language and theme from localStorage in a useEffect
   useEffect(() => {
-    if (language) {
+    if (typeof window !== "undefined") {
+      const storedLanguage = localStorage.getItem("language");
+      const storedTheme = localStorage.getItem("theme");
+
+      if (storedLanguage) setLanguage(storedLanguage);
+      if (storedTheme) setTheme(storedTheme);
+    }
+  }, []);
+
+  // Save language to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== "undefined" && language) {
       localStorage.setItem("language", language);
     }
   }, [language]);
 
-  // Simpan theme ke localStorage jika berubah
+  // Save theme to localStorage when it changes
   useEffect(() => {
-    if (theme) {
+    if (typeof window !== "undefined" && theme) {
       localStorage.setItem("theme", theme);
     }
   }, [theme]);
 
-  // Fungsi untuk mengelola analisis gambar
   const handleAnalyzeImage = async () => {
     if (image) {
       setIsAnalyzing(true);
@@ -99,14 +99,6 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  // Fungsi untuk menutup dialog
-  // const handleCloseDialog = () => {
-  //   setIsDialogOpen(false);
-  //   setIsProfileOpen(false);
-  //   setIsSettingOpen(false);
-  // };
-
-  // Fungsi untuk logout
   const handleLogout = () => {
     setIsDialogOpen(true);
   };

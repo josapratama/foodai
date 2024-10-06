@@ -51,7 +51,7 @@ const AnalysisTabs: React.FC = () => {
     };
 
     fetchData();
-  }, []);
+  }, [tabData]);
 
   const renderCards = (items: Item[], linkPrefix: string) => {
     return items.map((item) => (
