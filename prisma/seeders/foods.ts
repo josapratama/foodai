@@ -1,0 +1,257 @@
+import { ImageFoods } from "@/assets/food";
+import { Prisma, PrismaClient } from "@prisma/client";
+
+export default async function run(prisma: PrismaClient) {
+  console.info("Seed foods...");
+
+  const categoryIds = [
+    "food-category-id-1",
+    "food-category-id-2",
+    "food-category-id-3",
+    "food-category-id-4",
+    "food-category-id-5",
+  ];
+
+  const foods: Array<Prisma.FoodCreateInput> = [
+    {
+      id: "1",
+      name: "Nasi Putih",
+      calories: 130,
+      carbohydrates: 28.6,
+      protein: 2.4,
+      fat: 0.3,
+      sodium: 1,
+      potassium: 26,
+      cholesterol: 0,
+      fiber: 0.4,
+      sugar: 0.1,
+      saturatedFat: 0.1,
+      transFat: 0,
+      vitamins: {},
+      minerals: {},
+      image: ImageFoods.nasiPutih,
+      category: {
+        connect: {
+          id: categoryIds[Math.floor(Math.random() * categoryIds.length)],
+        },
+      },
+    },
+    {
+      id: "2",
+      name: "Ayam Goreng",
+      calories: 250,
+      carbohydrates: 0,
+      protein: 25,
+      fat: 17,
+      sodium: 600,
+      potassium: 300,
+      cholesterol: 90,
+      fiber: undefined,
+      sugar: undefined,
+      saturatedFat: 5,
+      transFat: 0.5,
+      vitamins: {},
+      minerals: {},
+      image: ImageFoods.ayamGoreng,
+      category: {
+        connect: {
+          id: categoryIds[Math.floor(Math.random() * categoryIds.length)],
+        },
+      },
+    },
+    {
+      id: "3",
+      name: "Tempe",
+      calories: 197,
+      carbohydrates: 9.4,
+      protein: 19,
+      fat: 10,
+      sodium: 9,
+      potassium: 311,
+      cholesterol: 0,
+      fiber: 2.8,
+      sugar: 0.8,
+      saturatedFat: 1.7,
+      transFat: 0,
+      vitamins: {},
+      minerals: {},
+      image: ImageFoods.tempe,
+      category: {
+        connect: {
+          id: categoryIds[Math.floor(Math.random() * categoryIds.length)],
+        },
+      },
+    },
+    {
+      id: "4",
+      name: "Sayur Bayam",
+      calories: 23,
+      carbohydrates: 3.6,
+      protein: 2.9,
+      fat: 0.4,
+      sodium: 24,
+      potassium: 558,
+      cholesterol: 0,
+      fiber: 2.2,
+      sugar: 0.4,
+      saturatedFat: 0.1,
+      transFat: 0,
+      vitamins: {},
+      minerals: {},
+      image: ImageFoods.sayurBayam,
+      category: {
+        connect: {
+          id: categoryIds[Math.floor(Math.random() * categoryIds.length)],
+        },
+      },
+    },
+    {
+      id: "5",
+      name: "Ikan Salmon",
+      calories: 206,
+      carbohydrates: 0,
+      protein: 22,
+      fat: 13,
+      sodium: 60,
+      potassium: 628,
+      cholesterol: 63,
+      fiber: undefined,
+      sugar: undefined,
+      saturatedFat: 3.1,
+      transFat: 0,
+      vitamins: {},
+      minerals: {},
+      image: ImageFoods.ikanSalmon,
+      category: {
+        connect: {
+          id: categoryIds[Math.floor(Math.random() * categoryIds.length)],
+        },
+      },
+    },
+    {
+      id: "6",
+      name: "Kentang Rebus",
+      calories: 77,
+      carbohydrates: 17.6,
+      protein: 2.0,
+      fat: 0.1,
+      sodium: 6,
+      potassium: 425,
+      cholesterol: 0,
+      fiber: 2.2,
+      sugar: 0.8,
+      saturatedFat: 0,
+      transFat: 0,
+      vitamins: {},
+      minerals: {},
+      image: ImageFoods.kentangRebus,
+      category: {
+        connect: {
+          id: categoryIds[Math.floor(Math.random() * categoryIds.length)],
+        },
+      },
+    },
+    {
+      id: "7",
+      name: "Pasta",
+      calories: 157,
+      carbohydrates: 31,
+      protein: 5.8,
+      fat: 1.1,
+      sodium: 1,
+      potassium: 45,
+      cholesterol: 0,
+      fiber: 1.9,
+      sugar: 0.6,
+      saturatedFat: 0.2,
+      transFat: 0,
+      vitamins: {},
+      minerals: {},
+      image: ImageFoods.pasta,
+      category: {
+        connect: {
+          id: categoryIds[Math.floor(Math.random() * categoryIds.length)],
+        },
+      },
+    },
+    {
+      id: "8",
+      name: "Tahu",
+      calories: 144,
+      carbohydrates: 3.9,
+      protein: 15.7,
+      fat: 8.2,
+      sodium: 2,
+      potassium: 121,
+      cholesterol: 0,
+      fiber: 0.4,
+      sugar: 0.3,
+      saturatedFat: 1.4,
+      transFat: 0,
+      vitamins: {},
+      minerals: {},
+      image: ImageFoods.tahu,
+      category: {
+        connect: {
+          id: categoryIds[Math.floor(Math.random() * categoryIds.length)],
+        },
+      },
+    },
+    {
+      id: "9",
+      name: "Roti Gandum",
+      calories: 250,
+      carbohydrates: 40,
+      protein: 12,
+      fat: 4,
+      sodium: 300,
+      potassium: 230,
+      cholesterol: 0,
+      fiber: 6,
+      sugar: 5,
+      saturatedFat: 0.5,
+      transFat: 0,
+      vitamins: {},
+      minerals: {},
+      image: ImageFoods.rotiGandung,
+      category: {
+        connect: {
+          id: categoryIds[Math.floor(Math.random() * categoryIds.length)],
+        },
+      },
+    },
+    {
+      id: "10",
+      name: "Quinoa",
+      calories: 120,
+      carbohydrates: 21,
+      protein: 4,
+      fat: 2,
+      sodium: 5,
+      potassium: 318,
+      cholesterol: 0,
+      fiber: 2.8,
+      sugar: 0.9,
+      saturatedFat: 0.2,
+      transFat: 0,
+      vitamins: {},
+      minerals: {},
+      image: ImageFoods.quinoa,
+      category: {
+        connect: {
+          id: categoryIds[Math.floor(Math.random() * categoryIds.length)],
+        },
+      },
+    },
+  ];
+
+  await Promise.all(
+    foods.map(async (food) => {
+      await prisma.food.upsert({
+        where: { id: food.id }, // Use the id field for upserting
+        update: food,
+        create: food,
+      });
+    })
+  );
+}
