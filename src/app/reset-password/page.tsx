@@ -11,7 +11,9 @@ import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from "@/components/ui/input-otp"; // Import InputOTP from shadcn
+} from "@/components/ui/input-otp";
+import { validatePassword } from "@/utils/password"; // Import the function
+import { useTranslations } from "@/hooks/use-translations"; // Import translations hook
 
 const ResetPasswordPage: React.FC = () => {
   const [otp, setOtp] = useState("");
@@ -19,25 +21,10 @@ const ResetPasswordPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const { t } = useTranslations(); // Use translations
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
-  };
-
-  const validatePassword = (password: string): boolean => {
-    const minLength = 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumber = /\d/.test(password);
-    const hasSymbol = /[!@#$%^&*()_+\-={}[\];':"\\|,.<>/?]+/.test(password);
-
-    return (
-      password.length >= minLength &&
-      hasUpperCase &&
-      hasLowerCase &&
-      hasNumber &&
-      hasSymbol
-    );
   };
 
   const handleReset = async (e: React.FormEvent) => {
@@ -45,8 +32,8 @@ const ResetPasswordPage: React.FC = () => {
 
     if (!validatePassword(newPassword)) {
       toast({
-        title: "Error",
-        description: "Password does not meet complexity requirements.",
+        title: t("reset_password_page.error"),
+        description: t("reset_password_page.password_complexity_error"),
         variant: "destructive",
       });
       return;
@@ -63,32 +50,33 @@ const ResetPasswordPage: React.FC = () => {
 
       if (response.ok) {
         toast({
-          title: "Success",
-          description: "Password has been reset successfully.",
+          title: t("reset_password_page.success"),
+          description: t("reset_password_page.password_reset_success"),
         });
         router.push("/login");
       } else {
         const data = await response.json();
         toast({
-          title: "Error",
-          description: data.error || "Failed to reset password.",
+          title: t("reset_password_page.error"),
+          description:
+            data.error || t("reset_password_page.failed_to_reset_password"),
           variant: "destructive",
         });
       }
     } catch {
       toast({
-        title: "Error",
-        description: "An error occurred while resetting the password.",
+        title: t("reset_password_page.error"),
+        description: t("reset_password_page.unexpected_error"),
         variant: "destructive",
       });
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background px-4 sm:px-6 lg:px-8">
       <form onSubmit={handleReset} className="w-full max-w-sm mt-8 space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="otp">Enter OTP</Label>
+          <Label htmlFor="otp">{t("reset_password_page.enter_otp")}</Label>
           <InputOTP
             maxLength={6}
             value={otp}
@@ -105,7 +93,9 @@ const ResetPasswordPage: React.FC = () => {
           </InputOTP>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="newPassword">New Password</Label>
+          <Label htmlFor="newPassword">
+            {t("reset_password_page.new_password")}
+          </Label>
           <div className="relative">
             <Input
               id="newPassword"
@@ -113,6 +103,7 @@ const ResetPasswordPage: React.FC = () => {
               required
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full"
             />
             <Button
               type="button"
@@ -131,7 +122,7 @@ const ResetPasswordPage: React.FC = () => {
           </div>
         </div>
         <Button type="submit" className="w-full">
-          Reset Password
+          {t("reset_password_page.reset_password")}
         </Button>
       </form>
     </div>

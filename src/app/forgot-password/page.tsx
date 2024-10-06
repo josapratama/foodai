@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "@/hooks/use-translations";
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const { t } = useTranslations();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +28,8 @@ const ForgotPasswordPage: React.FC = () => {
 
       if (response.ok) {
         toast({
-          title: "OTP Sent",
-          description: `An OTP has been sent to ${email}`,
+          title: t("forgot_password_page.otp_sent"),
+          description: `t("forgot_password_page.otp_sent_to", ${email})`,
         });
         sessionStorage.setItem("resetPasswordEmail", email);
         setTimeout(() => {
@@ -36,16 +38,17 @@ const ForgotPasswordPage: React.FC = () => {
       } else {
         const data = await response.json();
         toast({
-          title: "Error",
-          description: data.error || "Failed to send OTP",
+          title: t("forgot_password_page.error"),
+          description:
+            data.error || t("forgot_password_page.failed_to_send_otp"),
           variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Error sending OTP:", error);
       toast({
-        title: "Error",
-        description: "An unexpected error occurred",
+        title: t("forgot_password_page.error"),
+        description: t("forgot_password_page.unexpected_error"),
         variant: "destructive",
       });
     } finally {
@@ -53,21 +56,33 @@ const ForgotPasswordPage: React.FC = () => {
     }
   };
 
+  const handleBack = () => {
+    router.back();
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background px-4 sm:px-6 lg:px-8">
       <form onSubmit={handleSubmit} className="w-full max-w-sm mt-8 space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="email">Enter your email to receive OTP</Label>
+          <Label htmlFor="email">
+            {t("forgot_password_page.enter_email_for_otp")}
+          </Label>
           <Input
             id="email"
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="w-full"
           />
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Sending..." : "Send OTP"}
+          {isLoading
+            ? t("forgot_password_page.sending")
+            : t("forgot_password_page.send_otp")}
+        </Button>
+        <Button variant="outline" className="w-full" onClick={handleBack}>
+          {t("forgot_password_page.back")}
         </Button>
       </form>
     </div>
