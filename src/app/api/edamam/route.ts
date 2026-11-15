@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 const APP_ID = process.env.EDAMAM_APP_ID;
 const APP_KEY = process.env.EDAMAM_APP_KEY;
 

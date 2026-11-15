@@ -1,23 +1,19 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const apiKey = process.env.OPENAI_API_KEY;
-
-if (!apiKey) {
-  throw new Error("OPENAI_API_KEY environment variable is missing or empty.");
-}
-
-const openai = new OpenAI({
-  apiKey: apiKey,
-});
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiKey) {
     console.error("OPENAI_API_KEY environment variable is missing or empty.");
-    return NextResponse.json({ error: "API key is missing" }, { status: 500 });
+    return NextResponse.json({ error: "OpenAI API key is missing. Please configure OPENAI_API_KEY in .env." }, { status: 500 });
   }
+
+  const openai = new OpenAI({
+    apiKey: apiKey,
+  });
 
   // Lanjutkan dengan pemrosesan API OpenAI di sini
   const { imageDescription } = await req.json();
